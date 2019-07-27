@@ -1,6 +1,6 @@
 import arg from 'arg';
 import inquirer from 'inquirer';
-// import { skiwa-materialize-boilerplate } from './main';
+import { skiwaMaterializeBoilerplate } from './main';
 
 function parseArgumentsIntoOptions(rawArgs) {
   const args = arg(
@@ -87,7 +87,8 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'input',
       name: 'title',
-      message: 'Quel est le titre de l\'onglet principal ?'
+      message: 'Quel est le titre de l\'onglet principal ?',
+      default: presets.title
     });
   }
 
@@ -95,7 +96,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'input',
       name: 'description',
-      message: 'Quel description le site doit-il avoir ?'
+      message: 'Quelle description le site doit-il avoir ?'
     });
   }
 
@@ -189,7 +190,6 @@ async function promptForMissingOptions(options) {
 
 
   const answers = await inquirer.prompt(questions);
-  console.log(answers);
   return {
     ...options,
     title: options.title || answers.title,
@@ -211,5 +211,5 @@ async function promptForMissingOptions(options) {
 export async function cli(args) {
   let options = parseArgumentsIntoOptions(args);
   options = await promptForMissingOptions(options);
-  // await skiwaMaterializeBoilerplate(options);
+  await skiwaMaterializeBoilerplate(options);
 }

@@ -33,7 +33,11 @@
   ],
   "dependencies": {
     "arg": "^4.1.1",
+    "chalk": "^2.4.2",
     "esm": "^3.2.25",
-    "inquirer": "^6.5.0"
+    "fs": "0.0.1-security",
+    "inquirer": "^6.5.0",
+    "request": "^2.88.0",
+    "unzipper": "^0.10.1"
   }
 }
