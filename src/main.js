@@ -33,11 +33,15 @@ export async function skiwaMaterializeBoilerplate(options){
     //Generating the stylesheet
     generateSCSS(options, colors);
 
-
     //Generating index.html
     generateHTML(options);
 
     //Generates htaccess
+    if(options.htaccess){
+      generateHtaccess(options);
+    }
+
+
     //Generates sitemap.xml
     //Generates robots.txt
 
@@ -250,6 +254,30 @@ async function generateHTML(options){
 
 }
 
+/**
+ * Generates the .htaccess file
+ */
+async function generateHtaccess(options){
+
+  var content = '';
+  content += `RewriteEngine On\n`;
+  content += `RewriteCond %{HTTPS} !on\n`;
+  content += `RewriteCond %{REQUEST_URI} !^/[0-9]+\\..+\\.cpaneldcv$\n`;
+  content += `RewriteCond %{REQUEST_URI} !^/\\.well-known/pki-validation/[A-F0-9]{32}\\.txt(?:\\ Comodo\\ DCV)?$\n`;
+  content += `RewriteRule (.*) https:\/\/%{HTTP_HOST}%{REQUEST_URI} [L,R=301]\n`;
+  content += `<Files .htaccess>\n`;
+  content += `order allow,deny\n`;
+  content += `deny from all\n`;
+  content += `</Files>\n`;
+  content += `\n`;
+  content += `Options All -Indexes`;
+
+  var stream = fs.createWriteStream('./'+options.name+'/.htaccess');
+  stream.once('open', function(fd) {
+    stream.write(content);
+    stream.end();
+  });
+}
 
 /**
  * CSS Sections template
