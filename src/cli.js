@@ -138,7 +138,7 @@ async function promptForMissingOptions(options) {
     });
   }
 
-  if (!options.colors) {
+  if (options.colors.length === 0) {
     questions.push({
       type: "input",
       name: "colors",
@@ -146,7 +146,7 @@ async function promptForMissingOptions(options) {
     });
   }
 
-  if (!options.sections) {
+  if (options.sections.length === 0) {
     questions.push({
       type: "input",
       name: "sections",
