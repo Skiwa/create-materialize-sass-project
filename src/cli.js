@@ -66,7 +66,7 @@ async function promptForMissingOptions(options) {
     opengraph: true,
     colors: [],
     sections: [],
-    jquery: false,
+    jquery: true,
     htaccess: true,
     robots: true,
     sitemap: true

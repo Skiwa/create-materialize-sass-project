@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import fs from 'fs';
+import http from 'http';
 import unzipper from 'unzipper';
 import request from 'request';
 
@@ -20,6 +21,9 @@ export async function skiwaMaterializeBoilerplate(options){
     retrieveMaterializeFiles(options);
 
     //Adding jquery
+    if(options.jquery){
+      retrieveJQuery(options);
+    }
 
     //Generating the stylesheets
     //Retrieving the colors and creating the functions
@@ -73,6 +77,7 @@ async function retrieveMaterializeFiles(options){
     fs.mkdirSync('./'+options.name+'/js/materialize');
     fs.mkdirSync('./'+options.name+'/js/materialize/bin');
 
+    //Iterates with each file
     d.files.forEach(f=>{
 
       //Removes the first path folder
@@ -92,6 +97,23 @@ async function retrieveMaterializeFiles(options){
           console.log(chalk.yellow.bold(path));
         }
       }
+    });
+  });
+}
+
+/**
+ * Download JQuery
+ */
+async function retrieveJQuery(options){
+  //Creates the file
+  const file = fs.createWriteStream('./'+options.name+'/js/jquery-3.4.1.min.js');
+  //Retrieve the contents
+  const request = http.get("http://code.jquery.com/jquery-3.4.1.min.js", function(response) {
+    response.pipe(file);
+    //Close the write stream
+    file.on('finish', function() {
+      console.log(chalk.yellow.bold("Jquery ajouté"));
+      file.close();
     });
   });
 }
