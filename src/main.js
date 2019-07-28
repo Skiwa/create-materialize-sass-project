@@ -41,10 +41,15 @@ export async function skiwaMaterializeBoilerplate(options){
       generateHtaccess(options);
     }
 
-
     //Generates sitemap.xml
-    //Generates robots.txt
+    if(options.sitemap){
+      generateSitemap(options);
+    }
 
+    //Generates robots.txt
+    if(options.robots){
+      generateRobots(options);
+    }
 
   }else{
     console.log(chalk.red.bold(`ERREUR: Un dossier avec le nom ${options.name} existe déjà !`));
@@ -278,6 +283,48 @@ async function generateHtaccess(options){
     stream.end();
   });
 }
+
+/**
+ * Generates the sitemap.xml file
+ */
+ async function generateSitemap(options){
+   var content = '';
+
+   content += `<?xml version="1.0" encoding="UTF-8"?>\n`;
+   content += `<urlset\n`;
+   content += `      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
+   content += `      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n`;
+   content += `      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 \n                  http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n`;
+   content += `<url>\n`;
+   content += `  <loc>${options.url}</loc>\n`;
+   content += `  <priority>1.00</priority>\n`;
+   content += `</url>\n`;
+   content += `\n`;
+   content += `</urlset>`;
+
+   var stream = fs.createWriteStream('./'+options.name+'/sitemap.xml');
+   stream.once('open', function(fd) {
+     stream.write(content);
+     stream.end();
+   });
+ }
+
+ /**
+  * Generates the robots.txt file
+  */
+  async function generateRobots(options){
+    var content = '';
+
+    content += `User-agent: * \n`;
+    content += `Disallow: `;
+
+    var stream = fs.createWriteStream('./'+options.name+'/robots.txt');
+    stream.once('open', function(fd) {
+      stream.write(content);
+      stream.end();
+    });
+  }
+
 
 /**
  * CSS Sections template
