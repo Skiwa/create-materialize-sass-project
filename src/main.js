@@ -3,6 +3,7 @@ import fs from 'fs';
 import http from 'http';
 import unzipper from 'unzipper';
 import request from 'request';
+import namer from 'color-namer';
 
 export async function skiwaMaterializeBoilerplate(options){
 
@@ -18,7 +19,7 @@ export async function skiwaMaterializeBoilerplate(options){
     createMainFiles(options);
 
     //Adding materialize
-    retrieveMaterializeFiles(options);
+    // retrieveMaterializeFiles(options);
 
     //Adding jquery
     if(options.jquery){
@@ -29,7 +30,12 @@ export async function skiwaMaterializeBoilerplate(options){
     //Retrieving the colors and creating the functions
     //Creating the sections
 
-    //
+    //Generating index.html
+
+    var colorPairs = await convertColors(options);
+    colorPairs.forEach(color=>{
+      console.log(chalk.hex(color.value).bold('Couleur : '+color.name+' ajoutée') + ' - ('+color.name+')');
+    })
 
   }else{
     console.log(chalk.red.bold(`ERREUR: Un dossier avec le nom ${options.name} existe déjà !`));
@@ -116,4 +122,19 @@ async function retrieveJQuery(options){
       file.close();
     });
   });
+}
+
+/**
+ * Converts color to name/value pairs
+ */
+async function convertColors(options){
+  var colors = new Array();
+  options.colors.forEach(color=>{
+    colors.push({
+      name: namer(color, {pick:['ntc']}).ntc[0].name.replace(/\s+/g, '-').toLowerCase(),
+      value: color
+    })
+  });
+
+  return colors;
 }
