@@ -1,9 +1,9 @@
 {
-  "name": "skiwa-materialize-boilerplate",
+  "name": "create-materialize-sass-project",
   "version": "1.0.0",
-  "description": "A NPM module generating a clean Sass/Materialize project",
+  "description": "A quick CLI generating a custom and clean Sass/Materialize project",
   "main": "src/index.js",
-  "bin": "bin/skiwa-materialize-boilerplate",
+  "bin": "bin/create-materialize-sass-project",
   "publishConfig": {
     "access": "public"
   },
@@ -20,13 +20,13 @@
   "author": "Julien Haegman <contact@jhaegman.com> (https://jhaegman.com)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Skiwa/skiwa-materialize-boilerplate.git"
+    "url": "git+https://github.com/Skiwa/create-materialize-sass-project.git"
   },
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Skiwa/skiwa-materialize-boilerplate/issues"
+    "url": "https://github.com/Skiwa/create-materialize-sass-project/issues"
   },
-  "homepage": "https://github.com/Skiwa/skiwa-materialize-boilerplate#readme",
+  "homepage": "https://github.com/Skiwa/create-materialize-sass-project#readme",
   "files": [
     "bin/",
     "src/"
