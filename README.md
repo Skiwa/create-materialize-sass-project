@@ -1,5 +1,6 @@
 <div align="center">
-  <p>
+  <p align="center"><img src="https://jhaegman.com/img/portfolio/create-materialize-sass-project.gif"</p>
+  <p align="center">
     <a href="https://nodei.co/npm/create-materialize-sass-project/"><img src="https://nodei.co/npm/create-materialize-sass-project.png"></a>
   </p>
 </div>
