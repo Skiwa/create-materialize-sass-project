@@ -1,6 +1,6 @@
 {
   "name": "create-materialize-sass-project",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A quick CLI generating a custom and clean Sass/Materialize project",
   "main": "src/index.js",
   "bin": "bin/create-materialize-sass-project",
