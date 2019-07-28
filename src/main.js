@@ -31,11 +31,15 @@ export async function skiwaMaterializeBoilerplate(options){
     })
 
     //Generating the stylesheet
-    createCSSSections(options, colors);
+    generateSCSS(options, colors);
 
 
     //Generating index.html
+    generateHTML(options);
 
+    //Generates htaccess
+    //Generates sitemap.xml
+    //Generates robots.txt
 
 
   }else{
@@ -137,7 +141,10 @@ async function convertColors(options){
   return colors;
 }
 
-async function createCSSSections(options, colors){
+/**
+ * Generates the SCSS main file
+ */
+async function generateSCSS(options, colors){
 
   //Open the main.scss write stream
   var stream = fs.createWriteStream('./'+options.name+'/sass/main.scss');
@@ -160,6 +167,89 @@ async function createCSSSections(options, colors){
     stream.end();
   });
 }
+
+/**
+ * Generates the HTML file
+ */
+async function generateHTML(options){
+  var content = '';
+
+  content += `<!DOCTYPE html>\n`;
+  content += `<html dir="${options.direction}" lang="${options.lang}">\n`;
+  content += `<head>\n`;
+  content += `  <meta charset="UTF-8">\n`;
+  content += `  <meta content="width=device-width, initial-scale=1.0" name="viewport">\n`;
+  content += options.description !== '' ? `  <meta content="${options.description}" name="description">\n` : '';
+  content += `  <meta content="ie=edge" http-equiv="X-UA-Compatible">\n`;
+  content += `  \n`;
+
+  if(options.opengraph){
+    content += `  <!-- @Facebook Open Graph -->\n`;
+    content += `  <meta property="og:type" content="website">\n`;
+    content += `  <meta property="og:url" content="${options.url}">\n`;
+    content += `  <meta property="og:title" content="${options.title}">\n`;
+    content += `  <!-- <meta property="og:image" content="${options.url}/img/social/banner">-->\n`;
+    content += `  <meta property="og:description" content="${options.description}">\n`;
+    content += `  <meta property="og:site_name" content="${options.title}">\n`;
+    content += `  \n`;
+    content += `  <!-- @Twitter Open Graph -->\n`;
+    content += `  <meta name="twitter:card" content="summary">\n`;
+    content += `  <!-- <meta name="twitter:creator" content="@twitteraccountname">-->\n`;
+    content += `  <meta name="twitter:url" content="${options.url}">\n`;
+    content += `  <meta name="twitter:title" content="${options.title}">\n`;
+    content += `  <meta name="twitter:description" content="${options.description}">\n`;
+    content += `  <meta name="twitter:image" content="${options.url}/img/social/banner"> -->\n`;
+  }
+
+  content += `\n`;
+  content += `  <!-- @Android colors -->\n`;
+	content += `  <meta content="${options.colors[0]}" name="theme-color">\n`;
+	content += `  <meta content="${options.colors[0]}" name="msapplication-navbutton-color">\n`;
+  content += `  <meta content="${options.colors[0]}" name="apple-mobile-web-app-status-bar-style">\n`;
+  content += `  \n`;
+  content += `  <title>${options.title}</title>\n`
+  content += `  \n`;
+  content += `  <!-- @Favicon -->\n`;
+  content += `  <!-- <link href="img/favicon.ico" rel="shortcut icon"> -->\n`;
+
+
+  content += `  <link href="css/materialize.min.css" rel="stylesheet">\n`;
+  content += `  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">\n`;
+  content += `  <link href="css/main.min.css" rel="stylesheet">\n`;
+  content += `</head>\n`;
+  content += `<body>\n`;
+  content += `\n`;
+  content += `  <!-- @NoScript -->\n`;
+  content += `  <!-- <noscript>No script message</noscript> -->\n`;
+  content += `\n`;
+  content += `  <header></header>\n`;
+  content += `\n`;
+  content += `  <main>\n`;
+  options.sections.forEach(section=>{
+    content += `    <div class="section-${section.replace(/\s+/g, '-').toLowerCase()}"></div>\n`;
+  });
+  content += `  </main>\n`;
+  content += `\n`;
+  content += `  <footer></footer>\n`;
+  content += `\n`;
+  content += `\n`;
+  if(options.jquery){
+    content += `  <script src="js/jquery-3.4.1.min.js"></script>\n`;
+  }
+  content += `  <script src="js/materialize/materialize.min.js"></script>\n`;
+  content += `  <script src="js/main.min.js"></script>\n`;
+  content += `</body>\n`;
+  content += `</html>`;
+
+
+  var stream = fs.createWriteStream('./'+options.name+'/index.html');
+  stream.once('open', function(fd) {
+    stream.write(content);
+    stream.end();
+  });
+
+}
+
 
 /**
  * CSS Sections template
