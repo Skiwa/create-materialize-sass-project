@@ -38,6 +38,7 @@
     "esm": "^3.2.25",
     "fs": "0.0.1-security",
     "inquirer": "^6.5.0",
+    "listr": "^0.14.3",
     "request": "^2.88.0",
     "unzipper": "^0.10.1"
   }

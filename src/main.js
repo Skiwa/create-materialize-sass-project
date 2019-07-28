@@ -4,55 +4,102 @@ import http from 'http';
 import unzipper from 'unzipper';
 import request from 'request';
 import namer from 'color-namer';
+import Listr from 'listr';
 
 export async function skiwaMaterializeBoilerplate(options){
 
-
   if(!fs.existsSync('./'+options.name)){
+    var colors;
 
-    //Creating folders
-    createFolders(options);
+    const tasks = new Listr(
+      [
+        {
+          title: 'Create the folders',
+          task: () => createFolders(options)
+        },
+        {
+          title: 'Create the main files',
+          task: () => createMainFiles(options)
+        },
+        {
+          title: 'Retrieve the materialize assets',
+          task: () => retrieveMaterializeFiles(options)
+        },
+        {
+          title: 'Retrieve JQuery (3.4.1)',
+          enabled: () => options.jquery,
+          task: () => retrieveJQuery(options)
+        },
+        {
+          title: 'Convert the colors into human friendly classes',
+          task: async () => {
+             colors = await convertColors(options);
+          }
+        },
+        {
+          title: 'Generating the stylesheet',
+          task: () => generateSCSS(options, colors)
+        },
+        {
+          title: 'Generating index.html',
+          task: () => generateHTML(options)
+        },
+        {
+          title: 'Generating .htaccess',
+          enabled: () => options.htaccess,
+          task: () => generateHtaccess(options)
+        },
+        {
+          title: 'Generating sitemap.xml',
+          enabled: () => options.sitemap,
+          task: () => generateSitemap(options)
+        },
+        {
+          title: 'Generating robots.txt',
+          enabled: () => options.robots,
+          task: () => generateRobots(options)
+        },
+      ]
+    );
 
-    //Creating main files
-    createMainFiles(options);
+    await tasks.run();
 
-    //Adding materialize
-    retrieveMaterializeFiles(options);
+    colors.forEach(color =>{
+      console.log('Couleur ajoutée : %s', chalk.bgHex(color.value).bold(color.name));
+    });
 
-    //Adding jquery
-    if(options.jquery){
-      retrieveJQuery(options);
-    }
+    console.log('%s Projet généré, bon développement !', chalk.green.bold('Terminé'));
+    
+    return true;
+
 
     //Retrieving the colors
-    var colors = await convertColors(options);
-    colors.forEach(color=>{
-      console.log(chalk.hex(color.value).bold('Couleur : '+color.name+' ajoutée') + ' - ('+color.name+')');
-    })
+    // var colors = await convertColors(options);
 
     //Generating the stylesheet
-    generateSCSS(options, colors);
-
-    //Generating index.html
-    generateHTML(options);
-
-    //Generates htaccess
-    if(options.htaccess){
-      generateHtaccess(options);
-    }
-
-    //Generates sitemap.xml
-    if(options.sitemap){
-      generateSitemap(options);
-    }
-
-    //Generates robots.txt
-    if(options.robots){
-      generateRobots(options);
-    }
+    // generateSCSS(options, colors);
+    //
+    // //Generating index.html
+    // generateHTML(options);
+    //
+    // //Generates htaccess
+    // if(options.htaccess){
+    //   generateHtaccess(options);
+    // }
+    //
+    // //Generates sitemap.xml
+    // if(options.sitemap){
+    //   generateSitemap(options);
+    // }
+    //
+    // //Generates robots.txt
+    // if(options.robots){
+    //   generateRobots(options);
+    // }
 
   }else{
     console.log(chalk.red.bold(`ERREUR: Un dossier avec le nom ${options.name} existe déjà !`));
+    process.exit(1);
   }
 }
 
@@ -111,7 +158,6 @@ async function retrieveMaterializeFiles(options){
         //Copies the file
         if(!fs.existsSync('./'+options.name+'/'+path)){
           fs.writeFileSync('./'+options.name+'/'+path);
-          console.log(chalk.yellow.bold(path));
         }
       }
     });
@@ -129,7 +175,6 @@ async function retrieveJQuery(options){
     response.pipe(file);
     //Close the write stream
     file.on('finish', function() {
-      console.log(chalk.yellow.bold("Jquery ajouté"));
       file.close();
     });
   });
@@ -285,46 +330,45 @@ async function generateHtaccess(options){
 }
 
 /**
- * Generates the sitemap.xml file
- */
- async function generateSitemap(options){
-   var content = '';
+* Generates the sitemap.xml file
+*/
+async function generateSitemap(options){
+ var content = '';
 
-   content += `<?xml version="1.0" encoding="UTF-8"?>\n`;
-   content += `<urlset\n`;
-   content += `      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
-   content += `      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n`;
-   content += `      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 \n                  http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n`;
-   content += `<url>\n`;
-   content += `  <loc>${options.url}</loc>\n`;
-   content += `  <priority>1.00</priority>\n`;
-   content += `</url>\n`;
-   content += `\n`;
-   content += `</urlset>`;
+ content += `<?xml version="1.0" encoding="UTF-8"?>\n`;
+ content += `<urlset\n`;
+ content += `      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
+ content += `      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n`;
+ content += `      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 \n                  http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n`;
+ content += `<url>\n`;
+ content += `  <loc>${options.url}</loc>\n`;
+ content += `  <priority>1.00</priority>\n`;
+ content += `</url>\n`;
+ content += `\n`;
+ content += `</urlset>`;
 
-   var stream = fs.createWriteStream('./'+options.name+'/sitemap.xml');
-   stream.once('open', function(fd) {
-     stream.write(content);
-     stream.end();
-   });
- }
+ var stream = fs.createWriteStream('./'+options.name+'/sitemap.xml');
+ stream.once('open', function(fd) {
+   stream.write(content);
+   stream.end();
+ });
+}
 
- /**
-  * Generates the robots.txt file
-  */
-  async function generateRobots(options){
-    var content = '';
+/**
+* Generates the robots.txt file
+*/
+async function generateRobots(options){
+  var content = '';
 
-    content += `User-agent: * \n`;
-    content += `Disallow: `;
+  content += `User-agent: * \n`;
+  content += `Disallow: `;
 
-    var stream = fs.createWriteStream('./'+options.name+'/robots.txt');
-    stream.once('open', function(fd) {
-      stream.write(content);
-      stream.end();
-    });
-  }
-
+  var stream = fs.createWriteStream('./'+options.name+'/robots.txt');
+  stream.once('open', function(fd) {
+    stream.write(content);
+    stream.end();
+  });
+}
 
 /**
  * CSS Sections template
