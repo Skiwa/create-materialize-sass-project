@@ -14,24 +14,25 @@ export async function skiwaMaterializeBoilerplate(options){
     const tasks = new Listr(
       [
         {
-          title: 'Create the folders',
+          title: 'Creating the project structure',
           task: () => createFolders(options)
         },
         {
-          title: 'Create the main files',
+          title: 'Creating the main files',
           task: () => createMainFiles(options)
         },
         {
-          title: 'Retrieve the materialize assets',
+          title: 'Retrieving materialize assets',
           task: () => retrieveMaterializeFiles(options)
         },
         {
-          title: 'Retrieve JQuery (3.4.1)',
+          title: 'Retrieving JQuery (3.4.1)',
           enabled: () => options.jquery,
           task: () => retrieveJQuery(options)
         },
         {
-          title: 'Convert the colors into human friendly classes',
+          title: 'Converting the colors into human friendly classes',
+          enabled: () => options.colors.length > 0,
           task: async () => {
              colors = await convertColors(options);
           }
@@ -45,17 +46,17 @@ export async function skiwaMaterializeBoilerplate(options){
           task: () => generateHTML(options)
         },
         {
-          title: 'Generating .htaccess',
+          title: 'Generating the htaccess file',
           enabled: () => options.htaccess,
           task: () => generateHtaccess(options)
         },
         {
-          title: 'Generating sitemap.xml',
+          title: 'Generating the sitemap file',
           enabled: () => options.sitemap,
           task: () => generateSitemap(options)
         },
         {
-          title: 'Generating robots.txt',
+          title: 'Generating the robots.txt file',
           enabled: () => options.robots,
           task: () => generateRobots(options)
         },
@@ -64,41 +65,18 @@ export async function skiwaMaterializeBoilerplate(options){
 
     await tasks.run();
 
-    colors.forEach(color =>{
-      console.log('Couleur ajoutée : %s', chalk.bgHex(color.value).bold(color.name));
-    });
+    if(colors){
+      colors.forEach(color =>{
+        console.log('Color added : %s', chalk.bgHex(color.value).bold(color.name));
+      });
+    }
 
-    console.log('%s Projet généré, bon développement !', chalk.green.bold('Terminé'));
-    
+    console.log('%s Website successfuly generated, happy dev !', chalk.green.bold('DONE'));
+
     return true;
 
-
-    //Retrieving the colors
-    // var colors = await convertColors(options);
-
-    //Generating the stylesheet
-    // generateSCSS(options, colors);
-    //
-    // //Generating index.html
-    // generateHTML(options);
-    //
-    // //Generates htaccess
-    // if(options.htaccess){
-    //   generateHtaccess(options);
-    // }
-    //
-    // //Generates sitemap.xml
-    // if(options.sitemap){
-    //   generateSitemap(options);
-    // }
-    //
-    // //Generates robots.txt
-    // if(options.robots){
-    //   generateRobots(options);
-    // }
-
   }else{
-    console.log(chalk.red.bold(`ERREUR: Un dossier avec le nom ${options.name} existe déjà !`));
+    console.log('%s : A folder with the name "'+options.name+'" already exists !', chalk.red.bold('ERROR'));
     process.exit(1);
   }
 }
@@ -206,13 +184,20 @@ async function generateSCSS(options, colors){
 
     stream.write(cssDivider('global'));
     //Add the colors
-    stream.write(colorClasses(colors));
+    if(colors){
+      stream.write(colorClasses(colors));
+    }
     stream.write(cssDivider('header', true, 'global'));
     stream.write(cssDivider('main', true, 'global'));
-    //Add each section
-    options.sections.forEach(section=>{
-      stream.write(cssDivider(section, true, 'class'));
-    });
+
+    if(options.sections.length > 0){
+      //Add each section
+      options.sections.forEach(section=>{
+        if(section && section !== ''){
+          stream.write(cssDivider(section, true, 'class'));
+        }
+      });
+    }
     stream.write(cssDivider('footer', true, 'global'));
     stream.write(cssDivider('responsive-styles', true));
     //Add the responsive styles
@@ -239,27 +224,27 @@ async function generateHTML(options){
 
   if(options.opengraph){
     content += `  <!-- @Facebook Open Graph -->\n`;
+    content += `  <!-- <meta property="og:image" content="${options.url}/img/social/banner">-->\n`;
     content += `  <meta property="og:type" content="website">\n`;
     content += `  <meta property="og:url" content="${options.url}">\n`;
     content += `  <meta property="og:title" content="${options.title}">\n`;
-    content += `  <!-- <meta property="og:image" content="${options.url}/img/social/banner">-->\n`;
     content += `  <meta property="og:description" content="${options.description}">\n`;
     content += `  <meta property="og:site_name" content="${options.title}">\n`;
     content += `  \n`;
     content += `  <!-- @Twitter Open Graph -->\n`;
-    content += `  <meta name="twitter:card" content="summary">\n`;
     content += `  <!-- <meta name="twitter:creator" content="@twitteraccountname">-->\n`;
+    content += `  <!-- <meta name="twitter:image" content="${options.url}/img/social/banner"> -->\n`;
+    content += `  <meta name="twitter:card" content="summary">\n`;
     content += `  <meta name="twitter:url" content="${options.url}">\n`;
     content += `  <meta name="twitter:title" content="${options.title}">\n`;
     content += `  <meta name="twitter:description" content="${options.description}">\n`;
-    content += `  <meta name="twitter:image" content="${options.url}/img/social/banner"> -->\n`;
   }
 
   content += `\n`;
   content += `  <!-- @Android colors -->\n`;
-	content += `  <meta content="${options.colors[0]}" name="theme-color">\n`;
-	content += `  <meta content="${options.colors[0]}" name="msapplication-navbutton-color">\n`;
-  content += `  <meta content="${options.colors[0]}" name="apple-mobile-web-app-status-bar-style">\n`;
+	content += `  ${!options.colors || options.colors.length === 0 ? '<!--' : ''}<meta content="${options.colors[0] ? options.colors[0] : ''}" name="theme-color">\n`;
+	content += `  <meta content="${options.colors[0] ? options.colors[0] : ''}" name="msapplication-navbutton-color">\n`;
+  content += `  <meta content="${options.colors[0] ? options.colors[0] : ''}" name="apple-mobile-web-app-status-bar-style">${!options.colors || options.colors.length === 0  ? '-->' : ''}\n`;
   content += `  \n`;
   content += `  <title>${options.title}</title>\n`
   content += `  \n`;

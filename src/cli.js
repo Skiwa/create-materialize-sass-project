@@ -45,8 +45,8 @@ function parseArgumentsIntoOptions(rawArgs) {
     lang: args['--lang'] || null,
     direction: args['--direction'] || null,
     opengraph: args['--opengraph'] || null,
-    colors: args['--colors'] || null,
-    sections: args['--sections'] || null,
+    colors: args['--colors'] || [],
+    sections: args['--sections'] || [],
     jquery: args['--jquery'] || null,
     htaccess: args['--htaccess'] || null,
     robots: args['--robots'] || null,
@@ -58,14 +58,14 @@ async function promptForMissingOptions(options) {
   const defaultTemplate = 'javascript';
   var presets = {
     name: null,
-    title: "Generated with @skiwa-materialize-boilerplate",
-    description: null,
-    url: null,
-    lang: 'fr',
+    title: "New Materialize website",
+    description: 'Generated with @skiwa-materialize-boilerplate',
+    url: 'www.example.com',
+    lang: 'en',
     direction: 'ltr',
     opengraph: true,
     colors: [],
-    sections: [],
+    sections: ['first', 'second', 'third'],
     jquery: true,
     htaccess: true,
     robots: true,
@@ -76,7 +76,7 @@ async function promptForMissingOptions(options) {
 
   //User skips everything
   if (options.skipPrompts) {
-    console.log("Toutes les options sont passées, le preset par défault va être appliqué.");
+    console.log("Options skipped, the default preset will be applied.");
     return {
         ...presets,
         name: options.name,
@@ -87,7 +87,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'input',
       name: 'title',
-      message: 'Quel est le titre de l\'onglet principal ?',
+      message: 'What\'s the website\'s title ?',
       default: presets.title
     });
   }
@@ -96,7 +96,8 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'input',
       name: 'description',
-      message: 'Quelle description le site doit-il avoir ?'
+      message: 'What is the website\'s description  ?',
+      default: presets.description
     });
   }
 
@@ -104,7 +105,8 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'input',
       name: 'url',
-      message: 'Quelle est l\'url du site ?'
+      message: 'What URL does it have ?',
+      default: presets.url
     });
   }
 
@@ -112,7 +114,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'input',
       name: 'lang',
-      message: 'Quelle est la langue du site ?',
+      message: 'What is the main language ?',
       default: presets.lang
     });
   }
@@ -121,7 +123,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'list',
       name: 'direction',
-      message: 'Quelle est le sens de lecture du site ?',
+      message: 'What\'s the reading direction ?',
       choices: ['ltr','rtl'],
       default: presets.dir
     });
@@ -131,7 +133,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'confirm',
       name: 'opengraph',
-      message: 'Le site a-t-il besoin d\'informations OpenGraph ?',
+      message: 'Does the website needs OpenGraph tags ?',
       default: presets.opengraph
     });
   }
@@ -140,7 +142,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'input',
       name: 'colors',
-      message: 'Quelles sont les couleurs du site ? (Séparer via un espace)'
+      message: 'What are the main custom colors ? (Separate with space)'
     });
   }
 
@@ -148,7 +150,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'input',
       name: 'sections',
-      message: 'Quelles sont les différentes sections du site ? (Séparer via un espace)'
+      message: 'What area the main sections ? (Separate with space)'
     });
   }
 
@@ -156,7 +158,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'confirm',
       name: 'jquery',
-      message: 'Voulez-vous ajouter JQuery ?',
+      message: 'Does the website needs JQuery ?',
       default: presets.jquery
     });
   }
@@ -165,7 +167,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'confirm',
       name: 'htaccess',
-      message: 'Voulez-vous créer un fichier .htaccess ?',
+      message: 'Do you want to generate an .htaccess file ?',
       default: presets.htaccess
     });
   }
@@ -174,7 +176,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'confirm',
       name: 'robots',
-      message: 'Voulez-vous créer un fichier .robots.txt ?',
+      message: 'Do you want to generate a robots.txt file ?',
       default: presets.robots
     });
   }
@@ -183,7 +185,7 @@ async function promptForMissingOptions(options) {
     questions.push({
       type: 'confirm',
       name: 'sitemap',
-      message: 'Voulez-vous créer un fichier sitemap.xml ?',
+      message: 'Do you want to generate a sitemap file ?',
       default: presets.sitemap
     });
   }
@@ -198,8 +200,8 @@ async function promptForMissingOptions(options) {
     lang: options.lang || answers.lang,
     direction: options.direction || answers.direction,
     opengraph: options.opengraph || answers.opengraph,
-    colors: options.colors || answers.colors,
-    sections: options.sections || answers.sections,
+    colors: options.colors || answers.colors.split(' ') || [],
+    sections: options.sections || answers.sections.split(' ') || [],
     jquery: options.jquery || answers.jquery,
     htaccess: options.htaccess || answers.htaccess,
     robots: options.robots || answers.robots,
@@ -207,9 +209,9 @@ async function promptForMissingOptions(options) {
   };
 }
 
-
 export async function cli(args) {
   let options = parseArgumentsIntoOptions(args);
   options = await promptForMissingOptions(options);
+  console.log(options);
   await skiwaMaterializeBoilerplate(options);
 }
