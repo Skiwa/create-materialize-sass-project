@@ -8,8 +8,8 @@
 **create-materialize-sass-project** is an easy-to-use [Node.js](https://nodejs.org) CLI module that allows you to generate a quick [Materialize.css](https://materializecss.com/) project.
 
 - Complete website creation
-- Custom colors like the Materialize ones
-- Sass files
+- Custom human-readable colors following the Materialize syntax
+- Custom ready-to-go sections
 - Responsive design breakpoints
 
 ## Installation
@@ -124,9 +124,28 @@ and in the `sass/main.scss` file :
 
 }
 
+...
 
-[etc]
 ```
+
+## Project workflow
+
+Will all its steps of the project goes this way:
+
+1. CLI prompt
+2. Structure and folders creation
+3. Main files creation (index.html, js and css files)
+4. Materialize assets retrieval. Downloads and archive from the official website, unzips it and puts it in the correct folders
+5. JQuery retrieval
+6. Colors conversion into human-friendly names, using the `color-namer` library
+7. Stylesheet :
+   * Custom colors variables and classes
+   * Default sections (global, header, main, footer)
+   * Custom sections
+   * Responsive design section, with breakpoints presets
+8. HTML file generation
+9. Htaccess, sitemap and robots.txt files generation
+
 
 ## Links
 * [Personal website](https://jhaegman.com)
