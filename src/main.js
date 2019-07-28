@@ -8,8 +8,6 @@ import namer from 'color-namer';
 export async function skiwaMaterializeBoilerplate(options){
 
 
-
-  //Generating files
   if(!fs.existsSync('./'+options.name)){
 
     //Creating folders
@@ -19,30 +17,30 @@ export async function skiwaMaterializeBoilerplate(options){
     createMainFiles(options);
 
     //Adding materialize
-    // retrieveMaterializeFiles(options);
+    retrieveMaterializeFiles(options);
 
     //Adding jquery
     if(options.jquery){
       retrieveJQuery(options);
     }
 
-    //Generating the stylesheets
-    //Retrieving the colors and creating the functions
-    //Creating the sections
+    //Retrieving the colors
+    var colors = await convertColors(options);
+    colors.forEach(color=>{
+      console.log(chalk.hex(color.value).bold('Couleur : '+color.name+' ajoutée') + ' - ('+color.name+')');
+    })
+
+    //Generating the stylesheet
+    createCSSSections(options, colors);
+
 
     //Generating index.html
 
-    var colorPairs = await convertColors(options);
-    colorPairs.forEach(color=>{
-      console.log(chalk.hex(color.value).bold('Couleur : '+color.name+' ajoutée') + ' - ('+color.name+')');
-    })
+
 
   }else{
     console.log(chalk.red.bold(`ERREUR: Un dossier avec le nom ${options.name} existe déjà !`));
   }
-
-
-
 }
 
 /**
@@ -137,4 +135,95 @@ async function convertColors(options){
   });
 
   return colors;
+}
+
+async function createCSSSections(options, colors){
+
+  //Open the main.scss write stream
+  var stream = fs.createWriteStream('./'+options.name+'/sass/main.scss');
+  stream.once('open', function(fd) {
+
+    stream.write(cssDivider('global'));
+    //Add the colors
+    stream.write(colorClasses(colors));
+    stream.write(cssDivider('header', true, 'global'));
+    stream.write(cssDivider('main', true, 'global'));
+    //Add each section
+    options.sections.forEach(section=>{
+      stream.write(cssDivider(section, true, 'class'));
+    });
+    stream.write(cssDivider('footer', true, 'global'));
+    stream.write(cssDivider('responsive-styles', true));
+    //Add the responsive styles
+    stream.write(responsiveStyles());
+
+    stream.end();
+  });
+}
+
+/**
+ * CSS Sections template
+ */
+function cssDivider(title, spaces=false, selector){
+  var content = (spaces ? '\n\n\n':'')+"/*------------------------------------*\\ \n    $"+title.toUpperCase()+" \n\\*------------------------------------*/ \n";
+  if(selector){
+    content += (selector === 'class' ? '.section-':'')+title.replace(/\s+/g, '-').toLowerCase()+'{\n\n}';
+  }
+
+  return content;
+}
+
+/**
+ * Generates the custom color classes for materialize
+ */
+ function colorClasses(colors){
+   var content = '';
+
+   content+='// Generated color classes\n';
+
+   //Sass variables
+   colors.forEach(color=>{
+     content+=`\$${color.name}: ${color.value};\n`
+   })
+
+   content+='\n';
+
+   //Materialize classes
+   colors.forEach(color=>{
+     content+=`.${color.name}{background-color: \$${color.name} !important;}\n`;
+     content+=`.${color.name}-text{color: \$${color.name} !important;}\n`;
+   })
+
+   return content;
+ }
+
+/**
+ * Responsive styles template
+ */
+function responsiveStyles(){
+  var content = '';
+
+  content+='// Media Query Ranges\n'
+  content+='$small-screen-up: 601px !default;\n'
+  content+='$medium-screen-up: 993px !default;\n'
+  content+='$large-screen-up: 1201px !default;\n'
+  content+='$small-screen: 600px !default;\n'
+  content+='$medium-screen: 992px !default;\n'
+  content+='$large-screen: 1200px !default;\n'
+  content+='\n'
+  content+='$medium-and-up: "only screen and (min-width : #{$small-screen-up})" !default;\n'
+  content+='$large-and-up: "only screen and (min-width : #{$medium-screen-up})" !default;\n'
+  content+='$extra-large-and-up: "only screen and (min-width : #{$large-screen-up})" !default;\n'
+  content+='$small-and-down: "only screen and (max-width : #{$small-screen})" !default;\n'
+  content+='$medium-and-down: "only screen and (max-width : #{$medium-screen})" !default;\n'
+  content+='$medium-only: "only screen and (min-width : #{$small-screen-up}) and (max-width : #{$medium-screen})" !default;\n'
+  content+='\n'
+  content+='\n'
+  content+='@media #{$small-and-down} {}\n'
+  content+='@media #{$medium-and-up} {}\n'
+  content+='@media #{$medium-and-down} {}\n'
+  content+='@media #{$large-and-up} {}\n'
+  content+='@media #{$extra-large-and-up} {}\n'
+
+  return content;
 }
